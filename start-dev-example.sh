@@ -1,10 +1,10 @@
 #!/bin/bash
 
 # Full node
-export RPC_BASEURL=http://<full node ip>:8332/
-export RPC_USERNAME=<RPC username>
-export RPC_PASSWORD=<RPC password>
-export NETWORK=mainnet
+export RPC_BASEURL=http://localhost:18444/
+export RPC_USERNAME=regtest
+export RPC_PASSWORD=regtest
+export NETWORK=regtest
 
 # SLPDB
 export SLPDB_URL=http://<SLPDB IP>:12300/
@@ -15,9 +15,15 @@ export BLOCKBOOK_URL=https://<Blockbook IP>:9131/
 export NODE_TLS_REJECT_UNAUTHORIZED=0
 
 # Mainnet Fulcrum / ElectrumX
-export FULCRUM_URL=192.168.0.6
+export FULCRUM_URL=localhost
 export FULCRUM_PORT=50002
 
+export SECURITY=false
+### require if SECURITY=true ###
 export TOKENSECRET=somelongpassword
+# Redis require for rate limite middleware
+export REDIS_HOST=6379
+export REDIS_PORT=127.0.0.1
+##################################
 
 npm start
