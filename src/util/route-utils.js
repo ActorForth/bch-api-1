@@ -73,14 +73,16 @@ class RouteUtils {
 
       // Convert the user-provided address to a cashaddress, for easy detection
       // of the intended network.
-      const cashAddr = this.bchjs.Address.toCashAddress(addr)
+      // const cashAddr = this.bchjs.Address.toCashAddress(addr)
+      const addrIsRegTest = this.bchjs.Address.isRegTestAddress(addr)
+      if (network === 'regtest' && addrIsRegTest) return true
 
       // Return true if the network and address both match testnet
-      const addrIsTest = this.bchjs.Address.isTestnetAddress(cashAddr)
+      const addrIsTest = this.bchjs.Address.isTestnetAddress(addr)
       if (network === 'testnet' && addrIsTest) return true
 
       // Return true if the network and address both match mainnet
-      const addrIsMain = this.bchjs.Address.isMainnetAddress(cashAddr)
+      const addrIsMain = this.bchjs.Address.isMainnetAddress(addr)
       if (network === 'mainnet' && addrIsMain) return true
 
       return false

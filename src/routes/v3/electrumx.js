@@ -193,10 +193,10 @@ class Electrum {
         })
       }
 
-      const cashAddr = _this.bchjs.Address.toCashAddress(address)
+      // const cashAddr = _this.bchjs.Address.toCashAddress(address)
 
       // Prevent a common user error. Ensure they are using the correct network address.
-      const networkIsValid = _this.routeUtils.validateNetwork(cashAddr)
+      const networkIsValid = _this.routeUtils.validateNetwork(address)
       if (!networkIsValid) {
         res.status(400)
         return res.json({
@@ -208,11 +208,11 @@ class Electrum {
 
       wlogger.debug(
         'Executing electrumx/getUtxos with this address: ',
-        cashAddr
+        address
       )
 
       // Get data from ElectrumX server.
-      const electrumResponse = await _this._utxosFromElectrumx(cashAddr)
+      const electrumResponse = await _this._utxosFromElectrumx(address)
       // console.log(`_utxosFromElectrumx(): ${JSON.stringify(electrumResponse, null, 2)}`)
 
       // Pass the error message if ElectrumX reports an error.
@@ -719,10 +719,10 @@ class Electrum {
       }
 
       // Ensure the address is in cash address format.
-      const cashAddr = _this.bchjs.Address.toCashAddress(address)
+      // const cashAddr = _this.bchjs.Address.toCashAddress(address)
 
       // Prevent a common user error. Ensure they are using the correct network address.
-      const networkIsValid = _this.routeUtils.validateNetwork(cashAddr)
+      const networkIsValid = _this.routeUtils.validateNetwork(address)
       if (!networkIsValid) {
         res.status(400)
         return res.json({
@@ -734,11 +734,11 @@ class Electrum {
 
       wlogger.debug(
         'Executing electrumx/getBalance with this address: ',
-        cashAddr
+        address
       )
 
       // Get data from ElectrumX server.
-      const electrumResponse = await _this._balanceFromElectrumx(cashAddr)
+      const electrumResponse = await _this._balanceFromElectrumx(address)
       // console.log(`_utxosFromElectrumx(): ${JSON.stringify(electrumResponse, null, 2)}`)
 
       // Pass the error message if ElectrumX reports an error.
@@ -912,10 +912,10 @@ class Electrum {
       }
 
       // Ensure the address is in cash address format.
-      const cashAddr = _this.bchjs.Address.toCashAddress(address)
+      // const address = _this.bchjs.Address.toCashAddress(address)
 
       // Prevent a common user error. Ensure they are using the correct network address.
-      const networkIsValid = _this.routeUtils.validateNetwork(cashAddr)
+      const networkIsValid = _this.routeUtils.validateNetwork(address)
       if (!networkIsValid) {
         res.status(400)
         return res.json({
@@ -927,11 +927,11 @@ class Electrum {
 
       wlogger.debug(
         'Executing electrumx/getTransactions with this address: ',
-        cashAddr
+        address
       )
 
       // Get data from ElectrumX server.
-      const electrumResponse = await _this._transactionsFromElectrumx(cashAddr)
+      const electrumResponse = await _this._transactionsFromElectrumx(address)
       // console.log(`_utxosFromElectrumx(): ${JSON.stringify(electrumResponse, null, 2)}`)
 
       // Pass the error message if ElectrumX reports an error.
@@ -1105,10 +1105,10 @@ class Electrum {
       }
 
       // Ensure the address is in cash address format.
-      const cashAddr = _this.bchjs.Address.toCashAddress(address)
+      // const cashAddr = _this.bchjs.Address.toCashAddress(address)
 
       // Prevent a common user error. Ensure they are using the correct network address.
-      const networkIsValid = _this.routeUtils.validateNetwork(cashAddr)
+      const networkIsValid = _this.routeUtils.validateNetwork(address)
       if (!networkIsValid) {
         res.status(400)
         return res.json({
@@ -1120,11 +1120,11 @@ class Electrum {
 
       wlogger.debug(
         'Executing electrumx/getMempool with this address: ',
-        cashAddr
+        address
       )
 
       // Get data from ElectrumX server.
-      const electrumResponse = await _this._mempoolFromElectrumx(cashAddr)
+      const electrumResponse = await _this._mempoolFromElectrumx(address)
       // console.log(`_mempoolFromElectrumx(): ${JSON.stringify(electrumResponse, null, 2)}`)
 
       // Pass the error message if ElectrumX reports an error.
