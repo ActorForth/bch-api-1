@@ -5,19 +5,21 @@ RUN apt-get update -y
 
 # USER safeuser
 #Set the working directory to be the home directory
-RUN mkdir /home/safeuser/bch-api
-WORKDIR /home/safeuser/bch-api
+# RUN mkdir /home/safeuser/bch-api
+# WORKDIR /home/safeuser/bch-api
 
-COPY ./ /home/safeuser/bch-api/
+# COPY ./ /home/safeuser/bch-api/
 # Prep 'sudo' commands.
 #RUN echo 'abcd8765' | sudo -S pwd
 
 # # Clone the repository
-# WORKDIR /home/safeuser
-# RUN git clone https://github.com/Permissionless-Software-Foundation/bch-api
-# WORKDIR /home/safeuser/bch-api
+WORKDIR /home/safeuser
+RUN git clone https://github.com/ActorForth/bch-api.git
+WORKDIR /home/safeuser/bch-api
 
+RUN git checkout regtest
 RUN npm install
+
 
 # Generate documentation
 # RUN npm run docs
