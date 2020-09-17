@@ -7,8 +7,8 @@ bch-api-regtest:
   #   - redis-test
   ports:
     - "3000:3000"
-  volumes:
-    - ./:/home/safeuser/bch-api/
+  # volumes:
+  #   - ./:/home/safeuser/bch-api/
   restart: always
   environment:
     - RPC_BASEURL=http://bitcoind-regtest:18332/
