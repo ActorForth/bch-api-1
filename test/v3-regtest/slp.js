@@ -130,7 +130,7 @@ describe('#SLP', () => {
       assert.include(result.error, 'Invalid')
     })
 
-    it('should throw 5XX error when network issues', async () => {
+    it('should throw 5XX error when network issues 1', async () => {
       // Save the existing SLPDB_URL.
       const savedUrl2 = process.env.SLPDB_URL
 
@@ -138,10 +138,10 @@ describe('#SLP', () => {
       process.env.SLPDB_URL = 'http://fakeurl/api/'
 
       req.params.address =
-        'simpleledger:qpujxqra3jmdlzzapwmmt7uspr7q0c9ff5me5fdrdn'
+        'slpreg:qrfp57r3a75h0kplzt98f66ys6u6wy9nxvkpffkxaf'
 
       const result = await balancesForAddress(req, res)
-      // console.log(`result: ${util.inspect(result)}`)
+      console.log(`result: ${util.inspect(result)}`)
 
       // Restore the saved URL.
       process.env.SLPDB_URL = savedUrl2
@@ -162,7 +162,7 @@ describe('#SLP', () => {
       sandbox.stub(slpRoute.axios, 'request').throws({ code: 'ECONNABORTED' })
 
       req.params.address =
-        'simpleledger:qpujxqra3jmdlzzapwmmt7uspr7q0c9ff5me5fdrdn'
+        'slpreg:qrfp57r3a75h0kplzt98f66ys6u6wy9nxvkpffkxaf'
 
       const result = await balancesForAddress(req, res)
       // console.log(`result: ${JSON.stringify(result, null, 2)}`)
@@ -180,7 +180,7 @@ describe('#SLP', () => {
       sandbox.stub(slpRoute.axios, 'request').throws({ code: 'ECONNREFUSED' })
 
       req.params.address =
-        'simpleledger:qpujxqra3jmdlzzapwmmt7uspr7q0c9ff5me5fdrdn'
+        'slpreg:qrfp57r3a75h0kplzt98f66ys6u6wy9nxvkpffkxaf'
 
       const result = await balancesForAddress(req, res)
       // console.log(`result: ${JSON.stringify(result, null, 2)}`)
@@ -201,7 +201,7 @@ describe('#SLP', () => {
       }
 
       req.params.address =
-        'simpleledger:qpujxqra3jmdlzzapwmmt7uspr7q0c9ff5me5fdrdn'
+        'slpreg:qrfp57r3a75h0kplzt98f66ys6u6wy9nxvkpffkxaf'
 
       const result = await balancesForAddress(req, res)
       // console.log(`result: ${util.inspect(result)}`)
@@ -260,7 +260,7 @@ describe('#SLP', () => {
       process.env.SLPDB_URL = 'http://fakeurl/api/'
 
       req.body.addresses = [
-        'simpleledger:qpujxqra3jmdlzzapwmmt7uspr7q0c9ff5me5fdrdn'
+        'slpreg:qrfp57r3a75h0kplzt98f66ys6u6wy9nxvkpffkxaf'
       ]
 
       const result = await balancesForAddressBulk(req, res)
@@ -285,7 +285,7 @@ describe('#SLP', () => {
       sandbox.stub(slpRoute.axios, 'request').throws({ code: 'ECONNABORTED' })
 
       req.body.addresses = [
-        'simpleledger:qpujxqra3jmdlzzapwmmt7uspr7q0c9ff5me5fdrdn'
+        'slpreg:qrfp57r3a75h0kplzt98f66ys6u6wy9nxvkpffkxaf'
       ]
       const result = await balancesForAddressBulk(req, res)
       // console.log(`result: ${JSON.stringify(result, null, 2)}`)
@@ -303,7 +303,7 @@ describe('#SLP', () => {
       sandbox.stub(slpRoute.axios, 'request').throws({ code: 'ECONNREFUSED' })
 
       req.body.addresses = [
-        'simpleledger:qpujxqra3jmdlzzapwmmt7uspr7q0c9ff5me5fdrdn'
+        'slpreg:qrfp57r3a75h0kplzt98f66ys6u6wy9nxvkpffkxaf'
       ]
       const result = await balancesForAddressBulk(req, res)
       // console.log(`result: ${JSON.stringify(result, null, 2)}`)
@@ -783,7 +783,7 @@ describe('#SLP', () => {
 
       // req.params.address = 'simpleledger:qr5agtachyxvrwxu76vzszan5pnvuzy8duhv4lxrsk'
       req.params.address =
-        'simpleledger:qz4guf2k3p4r3t4tph0wwgyfq4p628lr2c0cvqplza'
+        'slpreg:qrfp57r3a75h0kplzt98f66ys6u6wy9nxvkpffkxaf'
 
       const result = await slpRoute.txsByAddressSingle(req, res)
       // console.log(`result: ${JSON.stringify(result, null, 2)}`)

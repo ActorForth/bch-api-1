@@ -353,8 +353,7 @@ class Slp {
       }
 
       // Prevent a common user error. Ensure they are using the correct network address.
-      const cashAddr = _this.bchjs.SLP.Address.toCashAddress(address)
-      const networkIsValid = _this.routeUtils.validateNetwork(cashAddr)
+      const networkIsValid = _this.routeUtils.validateNetwork(address)
       if (!networkIsValid) {
         res.status(400)
         return res.json({
@@ -560,8 +559,7 @@ class Slp {
         }
 
         // Prevent a common user error. Ensure they are using the correct network address.
-        const cashAddr = _this.bchjs.SLP.Address.toCashAddress(address)
-        const networkIsValid = _this.routeUtils.validateNetwork(cashAddr)
+        const networkIsValid = _this.routeUtils.validateNetwork(address)
         if (!networkIsValid) {
           res.status(400)
           return res.json({
@@ -1409,8 +1407,7 @@ class Slp {
       }
 
       // Ensure it is using the correct network.
-      const cashAddr = _this.bchjs.SLP.Address.toCashAddress(address)
-      const networkIsValid = routeUtils.validateNetwork(cashAddr)
+      const networkIsValid = routeUtils.validateNetwork(address)
       if (!networkIsValid) {
         res.status(400)
         return res.json({
