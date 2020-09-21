@@ -71,6 +71,8 @@ class RouteUtils {
         return false
       }
 
+      if (addr === '') return false
+
       // Convert the user-provided address to a cashaddress, for easy detection
       // of the intended network.
       // const cashAddr = this.bchjs.Address.toCashAddress(addr)

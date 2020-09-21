@@ -19,8 +19,8 @@ const rp = require('request-promise')
   3. Run this program with `node address.js`
   4. If successful, it will return the unconfirmed UTXOs.
 */
-const addr1 = 'bchtest:qpdcp5pv7qphu5tsjfgwezld9n9aq9ue6swgqpf45c'
-const addr2 = 'bchtest:qzpvx999fagau0xqmvu3xvll9evapge7u5hcgeknzv'
+const addr1 = 'bchreg:qzhf8ssjuy6ahwy7u4k7azspg2r0s0hs0cnccnk760'
+const addr2 = 'bchreg:qrsajv5ghg5hln5alxhd85ckx7uexk25jc4txs27rq'
 
 async function testSingleUnconfirmed () {
   try {

@@ -43,7 +43,7 @@ describe('#Blockbook Router', () => {
   before(() => {
     // console.log(`Testing type is: ${process.env.TEST}`)
 
-    if (!process.env.NETWORK) process.env.NETWORK = 'testnet'
+    if (!process.env.NETWORK) process.env.NETWORK = 'regtest'
   })
 
   // Setup the mocks before each test.
@@ -148,9 +148,9 @@ describe('#Blockbook Router', () => {
       }
     })
 
-    it('returns proper error when downstream service stalls', async () => {
+    it('returns proper error when downstream service stalls 1', async () => {
       req.params.address =
-        'bitcoincash:qrdka2205f4hyukutc2g0s6lykperc8nsu5u2ddpqf'
+        'bchreg:qzhf8ssjuy6ahwy7u4k7azspg2r0s0hs0cnccnk760'
 
       // Mock the timeout error.
       sandbox.stub(blockbookRoute.axios, 'request').throws({
@@ -161,6 +161,7 @@ describe('#Blockbook Router', () => {
       // console.log(`result: ${JSON.stringify(result, null, 2)}`)
 
       assert.isAbove(res.statusCode, 499, 'HTTP status code 503 expected.')
+      // console.log('RES.STATUSCODE', res.statusCode)
       assert.include(
         result.error,
         'Could not communicate with full node',
@@ -168,9 +169,9 @@ describe('#Blockbook Router', () => {
       )
     })
 
-    it('returns proper error when downstream service is down', async () => {
+    it('returns proper error when downstream service is down 1', async () => {
       req.params.address =
-        'bitcoincash:qrdka2205f4hyukutc2g0s6lykperc8nsu5u2ddpqf'
+        'bchreg:qqpwck0nyvfjs9qst4r7k0xsn89888qxeg3gmkghh2'
 
       // Mock the timeout error.
       sandbox.stub(blockbookRoute.axios, 'request').throws({
@@ -324,7 +325,7 @@ describe('#Blockbook Router', () => {
         process.env.BLOCKBOOK_URL = savedUrl
       }
     })
-    it('returns proper error when downstream service stalls', async () => {
+    it('returns proper error when downstream service stalls 2', async () => {
       req.body = {
         addresses: ['bitcoincash:qrdka2205f4hyukutc2g0s6lykperc8nsu5u2ddpqf']
       }
@@ -343,7 +344,7 @@ describe('#Blockbook Router', () => {
         'Error message expected'
       )
     })
-    it('returns proper error when downstream service is down', async () => {
+    it('returns proper error when downstream service is down 2', async () => {
       req.body = {
         addresses: ['bitcoincash:qrdka2205f4hyukutc2g0s6lykperc8nsu5u2ddpqf']
       }
@@ -487,7 +488,7 @@ describe('#Blockbook Router', () => {
         process.env.BLOCKBOOK_URL = savedUrl
       }
     })
-    it('returns proper error when downstream service stalls', async () => {
+    it('returns proper error when downstream service stalls 3', async () => {
       req.params.address =
         'bitcoincash:qp3sn6vlwz28ntmf3wmyra7jqttfx7z6zgtkygjhc7'
 
@@ -506,7 +507,7 @@ describe('#Blockbook Router', () => {
         'Error message expected'
       )
     })
-    it('returns proper error when downstream service is down', async () => {
+    it('returns proper error when downstream service is down 3', async () => {
       req.params.address =
         'bitcoincash:qp3sn6vlwz28ntmf3wmyra7jqttfx7z6zgtkygjhc7'
 
@@ -654,7 +655,7 @@ describe('#Blockbook Router', () => {
       }
     })
 
-    it('returns proper error when downstream service stalls', async () => {
+    it('returns proper error when downstream service stalls 4', async () => {
       req.body = {
         addresses: ['bitcoincash:qp3sn6vlwz28ntmf3wmyra7jqttfx7z6zgtkygjhc7']
       }
@@ -675,7 +676,7 @@ describe('#Blockbook Router', () => {
       )
     })
 
-    it('returns proper error when downstream service is down', async () => {
+    it('returns proper error when downstream service is down 4', async () => {
       req.body = {
         addresses: ['bitcoincash:qp3sn6vlwz28ntmf3wmyra7jqttfx7z6zgtkygjhc7']
       }
@@ -807,7 +808,7 @@ describe('#Blockbook Router', () => {
         process.env.BLOCKBOOK_URL = savedUrl
       }
     })
-    it('returns proper error when downstream service stalls', async () => {
+    it('returns proper error when downstream service stalls 5', async () => {
       req.params.txid =
         '6181c669614fa18039a19b23eb06806bfece1f7514ab457c3bb82a40fe171a6d'
 
@@ -826,7 +827,7 @@ describe('#Blockbook Router', () => {
         'Error message expected'
       )
     })
-    it('returns proper error when downstream service is down', async () => {
+    it('returns proper error when downstream service is down 5', async () => {
       req.params.txid =
         '6181c669614fa18039a19b23eb06806bfece1f7514ab457c3bb82a40fe171a6d'
 
@@ -996,7 +997,7 @@ describe('#Blockbook Router', () => {
         process.env.BLOCKBOOK_URL = savedUrl
       }
     })
-    it('returns proper error when downstream service stalls', async () => {
+    it('returns proper error when downstream service stalls 6', async () => {
       req.body = {
         txids: [
           '6181c669614fa18039a19b23eb06806bfece1f7514ab457c3bb82a40fe171a6d'
@@ -1018,7 +1019,7 @@ describe('#Blockbook Router', () => {
         'Error message expected'
       )
     })
-    it('returns proper error when downstream service is down', async () => {
+    it('returns proper error when downstream service is down 6', async () => {
       req.body = {
         txids: [
           '6181c669614fa18039a19b23eb06806bfece1f7514ab457c3bb82a40fe171a6d'

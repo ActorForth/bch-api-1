@@ -36,7 +36,7 @@ describe('#Encryption Router', () => {
   before(() => {
     // console.log(`Testing type is: ${process.env.TEST}`)
 
-    if (!process.env.NETWORK) process.env.NETWORK = 'testnet'
+    if (!process.env.NETWORK) process.env.NETWORK = 'regtest'
   })
 
   // Setup the mocks before each test.
@@ -71,11 +71,12 @@ describe('#Encryption Router', () => {
   })
 
   describe('#getPublicKey', () => {
+    // require blockbook
     it('should get public key from blockchain', async () => {
       req.params.address =
-        'bitcoincash:qrehqueqhw629p6e57994436w730t4rzasnly00ht0'
-
+        'bchreg:qzhf8ssjuy6ahwy7u4k7azspg2r0s0hs0cnccnk760'
       // Mock the Insight URL for unit tests.
+      console.log("require blockbook")
       if (process.env.TEST === 'unit') {
         sandbox
           .stub(encryptionRoute.blockbook, 'balanceFromBlockbook')
@@ -86,6 +87,7 @@ describe('#Encryption Router', () => {
       }
 
       const result = await encryptionRoute.getPublicKey(req, res)
+      console.log('RESULT', result)
       // console.log(`result: ${JSON.stringify(result, null, 2)}`)
 
       assert.property(result, 'success')
@@ -100,7 +102,7 @@ describe('#Encryption Router', () => {
 
     it('should return false for address with no tx history', async () => {
       req.params.address =
-        'bitcoincash:qqwfpk04ecf69wuprj9yjys9rla5mk7rj5j8uthqel'
+        'bchreg:qzhf8ssjuy6ahwy7u4k7azspg2r0s0hs0cnccnk760'
 
       // Mock the Insight URL for unit tests.
       if (process.env.TEST === 'unit') {
@@ -121,7 +123,7 @@ describe('#Encryption Router', () => {
 
     it('should return false for address with no send history', async () => {
       req.params.address =
-        'bitcoincash:qq78nwj5x97yh6wtlfd27dtlwjuh70vkjc59h8tgtg'
+        'bchreg:qzhf8ssjuy6ahwy7u4k7azspg2r0s0hs0cnccnk760'
 
       // Mock the Insight URL for unit tests.
       if (process.env.TEST === 'unit') {
