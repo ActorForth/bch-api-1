@@ -108,14 +108,14 @@ describe('#Util', () => {
       )
     })
 
-    it('should throw 503 when network issues', async () => {
+    it('should throw 503 when network issues 1', async () => {
       // Save the existing RPC URL.
       const savedUrl2 = process.env.RPC_BASEURL
 
       // Manipulate the URL to cause a 500 network error.
       process.env.RPC_BASEURL = 'http://fakeurl/api/'
 
-      req.params.address = 'bchtest:qqqk4y6lsl5da64sg5qc3xezmplyu5kmpyz2ysaa5y'
+      req.params.address = 'bchreg:qqpwck0nyvfjs9qst4r7k0xsn89888qxeg3gmkghh2'
 
       await validateAddress(req, res)
       // console.log(`result: ${util.inspect(result)}`)
@@ -140,7 +140,7 @@ describe('#Util', () => {
       }
 
       req.params.address =
-        'bitcoincash:qpujxqra3jmdlzzapwmmt7uspr7q0c9ff5hzljcrnd'
+        'bchreg:qqpwck0nyvfjs9qst4r7k0xsn89888qxeg3gmkghh2'
 
       const result = await validateAddress(req, res)
       // console.log(`result: ${util.inspect(result)}`)
@@ -172,7 +172,7 @@ describe('#Util', () => {
 
     it('should error on non-array single address', async () => {
       req.body = {
-        addresses: 'bchtest:qqqk4y6lsl5da64sg5qc3xezmplyu5kmpyz2ysaa5y'
+        addresses: 'bchreg:qqpwck0nyvfjs9qst4r7k0xsn89888qxeg3gmkghh2'
       }
 
       const result = await validateAddressBulk(req, res)
@@ -200,7 +200,7 @@ describe('#Util', () => {
 
     it('should error on invalid address', async () => {
       req.body = {
-        addresses: ['bchtest:qqqk4y6lsl5da64sg5qc3xezmpl']
+        addresses: ['bchtest:qqqk4y6lsl5da64sg5q00000000']
       }
 
       const result = await validateAddressBulk(req, res)
@@ -228,7 +228,7 @@ describe('#Util', () => {
       )
     })
 
-    it('should throw 503 when network issues', async () => {
+    it('should throw 503 when network issues 2', async () => {
       // Save the existing RPC URL.
       const savedUrl2 = process.env.RPC_BASEURL
 
@@ -236,10 +236,10 @@ describe('#Util', () => {
       process.env.RPC_BASEURL = 'http://fakeurl/api/'
 
       req.body.addresses = [
-        'bitcoincash:qpujxqra3jmdlzzapwmmt7uspr7q0c9ff5hzljcrnd'
+        'bchreg:qqpwck0nyvfjs9qst4r7k0xsn89888qxeg3gmkghh2'
       ]
 
-      await validateAddressBulk(req, res)
+      const result = await validateAddressBulk(req, res)
       // console.log(`result: ${util.inspect(result)}`)
 
       // Restore the saved URL.
@@ -261,7 +261,7 @@ describe('#Util', () => {
       }
 
       req.body.addresses = [
-        'bitcoincash:qpujxqra3jmdlzzapwmmt7uspr7q0c9ff5hzljcrnd'
+        'bchreg:qqpwck0nyvfjs9qst4r7k0xsn89888qxeg3gmkghh2'
       ]
 
       const result = await validateAddressBulk(req, res)
@@ -288,8 +288,8 @@ describe('#Util', () => {
       }
 
       req.body.addresses = [
-        'bitcoincash:qpujxqra3jmdlzzapwmmt7uspr7q0c9ff5hzljcrnd',
-        'bitcoincash:qpujxqra3jmdlzzapwmmt7uspr7q0c9ff5hzljcrnd'
+        'bchreg:qqpwck0nyvfjs9qst4r7k0xsn89888qxeg3gmkghh2',
+        'bchreg:qzhf8ssjuy6ahwy7u4k7azspg2r0s0hs0cnccnk760'
       ]
 
       const result = await validateAddressBulk(req, res)

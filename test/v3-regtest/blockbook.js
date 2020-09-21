@@ -36,7 +36,7 @@ const mockData = require('./mocks/blockbook-mock')
 // Used for debugging.
 const util = require('util')
 util.inspect.defaultOptions = { depth: 1 }
-
+console.log('ignore blockbook for now')
 describe('#Blockbook Router', () => {
   let req, res
   let sandbox

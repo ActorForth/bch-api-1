@@ -141,7 +141,7 @@ describe('#SLP', () => {
         'slpreg:qrfp57r3a75h0kplzt98f66ys6u6wy9nxvkpffkxaf'
 
       const result = await balancesForAddress(req, res)
-      console.log(`result: ${util.inspect(result)}`)
+      // console.log(`result: ${util.inspect(result)}`)
 
       // Restore the saved URL.
       process.env.SLPDB_URL = savedUrl2
