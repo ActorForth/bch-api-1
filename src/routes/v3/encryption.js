@@ -97,10 +97,10 @@ class Encryption {
         })
       }
 
-      const cashAddr = _this.bchjs.Address.toCashAddress(address)
+      // const cashAddr = _this.bchjs.Address.toCashAddress(address)
 
       // Prevent a common user error. Ensure they are using the correct network address.
-      const networkIsValid = _this.routeUtils.validateNetwork(cashAddr)
+      const networkIsValid = _this.routeUtils.validateNetwork(address)
       if (!networkIsValid) {
         res.status(400)
         return res.json({
@@ -112,11 +112,11 @@ class Encryption {
 
       wlogger.debug(
         'Executing encryption/getPublicKey with this address: ',
-        cashAddr
+        address
       )
 
       // Retrieve the transaction history for this address.
-      const balance = await _this.blockbook.balanceFromBlockbook(cashAddr)
+      const balance = await _this.blockbook.balanceFromBlockbook(address)
       // console.log(`balance: ${JSON.stringify(balance, null, 2)}`)
 
       const txHistory = balance.txids
@@ -159,7 +159,7 @@ class Encryption {
           // console.log(`cashAddr2: ${cashAddr2}`)
 
           // If public keys match, this is the correct public key.
-          if (cashAddr === cashAddr2) {
+          if (address === cashAddr2) {
             res.status(200)
             return res.json({
               success: true,
