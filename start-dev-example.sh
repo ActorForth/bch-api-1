@@ -7,7 +7,7 @@ export RPC_PASSWORD=regtest
 export NETWORK=regtest
 
 # SLPDB
-export SLPDB_URL=http://<SLPDB IP>:12300/
+export SLPDB_URL=http://localhost:12300/
 
 # Blockbook
 export BLOCKBOOK_URL=https://<Blockbook IP>:9131/
