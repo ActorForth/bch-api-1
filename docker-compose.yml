@@ -19,7 +19,7 @@ services:
           - RPC_USERNAME=regtest
           - RPC_PASSWORD=regtest
           - NETWORK=regtest
-          - SLPDB_URL=http://slpserve:12300/
+          - SLPDB_URL=http://slpserve:4000/
           # - BLOCKBOOK_URL=https://<Blockbook IP>:9131/
           - NODE_TLS_REJECT_UNAUTHORIZED=0
           - FULCRUM_URL=nginx-regtest
