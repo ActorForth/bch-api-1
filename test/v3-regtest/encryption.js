@@ -76,7 +76,7 @@ describe('#Encryption Router', () => {
       req.params.address =
         'bchreg:qzhf8ssjuy6ahwy7u4k7azspg2r0s0hs0cnccnk760'
       // Mock the Insight URL for unit tests.
-      console.log("require blockbook")
+      console.log('require blockbook')
       if (process.env.TEST === 'unit') {
         sandbox
           .stub(encryptionRoute.blockbook, 'balanceFromBlockbook')
