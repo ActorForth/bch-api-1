@@ -92,7 +92,7 @@ class Encryption {
         })
       }
 
-      // const cashAddr = _this.bchjs.Address.toCashAddress(address)
+      const cashAddr = _this.bchjs.Address.toCashAddress(address)
 
       // Prevent a common user error. Ensure they are using the correct network address.
       const networkIsValid = _this.routeUtils.validateNetwork(address)

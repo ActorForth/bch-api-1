@@ -239,9 +239,6 @@ describe('#Util', () => {
         'bchreg:qqpwck0nyvfjs9qst4r7k0xsn89888qxeg3gmkghh2'
       ]
 
-      const result = await validateAddressBulk(req, res)
-      // console.log(`result: ${util.inspect(result)}`)
-
       // Restore the saved URL.
       process.env.RPC_BASEURL = savedUrl2
 
