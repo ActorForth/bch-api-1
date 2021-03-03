@@ -13,16 +13,16 @@ export NETWORK=regtest
 
 # Full node
 # export RPC_IP=<ip>:8332
-export RPC_BASEURL=http://localhost:18332/
+export RPC_BASEURL=http://localhost:18443/
 export RPC_USERNAME=regtest
 export RPC_PASSWORD=regtest
 
 # SLPDB
 export SLPDB_PASS_GP=somelongpassword
-export SLPDB_URL=http://<SLPDB IP>:12300/
+export SLPDB_URL=http://localhost:12300/
 # Use the same address as SLPDB_URL if you don't have a separate whitelist server.
 export SLPDB_PASS_WL=somelongpassword
-export SLPDB_WHITELIST_URL=http://<SLPDB IP>:12300/
+# export SLPDB_WHITELIST_URL=http://<SLPDB IP>:12300/
 # slp-api alternative SLP validator using slp-validate:
 # https://github.com/Permissionless-Software-Foundation/slp-api
 export SLP_API_URL=http://10.0.0.5:5001/
@@ -67,4 +67,4 @@ export LOG_MAX_SIZE=1m
 #5d means store no more than 5 days
 export LOG_MAX_FILES=5d
 
-npm start
+# npm start
