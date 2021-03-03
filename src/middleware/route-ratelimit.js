@@ -1,9 +1,23 @@
+/*
+  Sets the rate limits for the anonymous and paid tiers. Current rate limits:
+  - 1000 points in 60 seconds
+  - 10 points per call for paid tier (100 RPM)
+  - 50 points per call for anonymous tier (20 RPM)
+
+  Background:
+  The rate limits below were originially coded with the idea of charging on a
+  per-resource basis. However, that was confusing to end users trying to purchase
+  a subscription. So everything was simplied to two tiers: paid and anonymous
+*/
+
 'use strict'
+
+const jwt = require('jsonwebtoken')
 
 const wlogger = require('../util/winston-logging')
 const config = require('../../config')
 
-const jwt = require('jsonwebtoken')
+const ANON_LIMITS = 50
 
 // Redis
 const redisOptions = {
@@ -20,7 +34,7 @@ const redisClient = new Redis(redisOptions)
 const { RateLimiterRedis } = require('rate-limiter-flexible')
 const rateLimitOptions = {
   storeClient: redisClient,
-  points: 100, // Number of points
+  points: 1000, // Number of points
   duration: 60 // Per minute (per 60 seconds)
 }
 
@@ -98,65 +112,82 @@ class RateLimits {
         wlogger.debug('No JWT token found!')
       }
 
-      // Used for displaying error message. Default value is 3.
-      let rateLimit = 3
+      // Default value is 50 points per request = 20 RPM
+      let rateLimit = ANON_LIMITS
 
-      // Code here for the rate limiter is adapted from this example:
-      // https://github.com/animir/node-rate-limiter-flexible/wiki/Overall-example#authorized-and-not-authorized-users
-      try {
-        // The resource being consumed: full node, indexer, SLPDB, etc.
-        const resource = _this.getResource(req.url)
-        wlogger.debug(`resource: ${resource}`)
+      // Only evaluate the JWT token if the user is not using Basic Authentication.
+      if (!req.locals.proLimit) {
+        // Code here for the rate limiter is adapted from this example:
+        // https://github.com/animir/node-rate-limiter-flexible/wiki/Overall-example#authorized-and-not-authorized-users
+        try {
+          // The resource being consumed: full node, indexer, SLPDB, etc.
+          const resource = _this.getResource(req.url)
+          wlogger.debug(`resource: ${resource}`)
 
-        let key = userId || req.ip
-        res.locals.key = key // Feedback for tests.
+          let key = userId || req.ip
+          res.locals.key = key // Feedback for tests.
 
-        // const pointsToConsume = userId ? 1 : 30
-        decoded.resource = resource
-        let pointsToConsume = _this.calcPoints(decoded)
-        res.locals.pointsToConsume = pointsToConsume // Feedback for tests.
-
-        // Retrieve the origin.
-        let origin = req.get('origin')
-        if (origin === undefined && key.indexOf('10.0.0.5') > -1) {
-          origin = 'slp-api'
-        }
-        wlogger.info(`origin: ${origin}`)
-
-        // If the request originates from one of the approved wallet apps, then
-        // apply paid-access rate limits.
-        if (
-          origin &&
-          (origin.toString().indexOf('wallet.fullstack.cash') > -1 ||
-            origin.toString().indexOf('sandbox.fullstack.cash') > -1 ||
-            origin === 'slp-api')
-        ) {
-          pointsToConsume = 1
+          // const pointsToConsume = userId ? 1 : 30
+          decoded.resource = resource
+          let pointsToConsume = _this.calcPoints(decoded)
           res.locals.pointsToConsume = pointsToConsume // Feedback for tests.
+
+          // Retrieve the origin.
+          let origin = req.get('origin')
+
+          // Handle calls coming from the intranet.
+          if (origin === undefined && key.indexOf('10.0.0.5') > -1) {
+            origin = 'slp-api'
+          }
+
+          wlogger.info(`origin: ${origin}`)
+
+          // If the request originates from one of the approved wallet apps, then
+          // apply paid-access rate limits.
+          if (
+            origin &&
+            (origin.toString().indexOf('fullstack.cash') > -1 ||
+              origin.toString().indexOf('splitbch.com') > -1 ||
+              origin.toString().indexOf('slp-api') > -1)
+          ) {
+            pointsToConsume = 10
+            res.locals.pointsToConsume = pointsToConsume // Feedback for tests.
+          }
+
+          // For internal calls, increase rate limits to as fast as possible.
+          if (
+            // Comment out the line below when running bch-js e2e rate limit tests.
+            key.toString().indexOf('::ffff:127.0.0.1') > -1 ||
+            // Do not comment out this line.
+            key.toString().indexOf('172.17.') > -1
+          ) {
+            pointsToConsume = 1
+            res.locals.pointsToConsume = pointsToConsume // Feedback for tests.
+          }
+
+          wlogger.info(
+            `User ${key} consuming ${pointsToConsume} point for resource ${resource}.`
+          )
+
+          rateLimit = Math.floor(1000 / pointsToConsume)
+
+          // Update the key so that rate limits track both the user and the resource.
+          key = `${key}-${resource}`
+
+          await _this.rateLimiter.consume(key, pointsToConsume)
+        } catch (err) {
+          // console.log('err: ', err)
+
+          // Used for returning data for tests.
+          res.locals.rateLimitTriggered = true
+          // console.log('res.locals: ', res.locals)
+
+          // Rate limited was triggered
+          res.status(429) // https://github.com/Bitcoin-com/rest.bitcoin.com/issues/330
+          return res.json({
+            error: `Too many requests. Your limits are currently ${rateLimit} requests per minute. Increase rate limits at https://fullstack.cash`
+          })
         }
-
-        wlogger.info(
-          `User ${key} consuming ${pointsToConsume} point for resource ${resource}.`
-        )
-
-        rateLimit = Math.floor(100 / pointsToConsume)
-
-        // Update the key so that rate limits track both the user and the resource.
-        key = `${key}-${resource}`
-
-        await _this.rateLimiter.consume(key, pointsToConsume)
-      } catch (err) {
-        // console.log('err: ', err)
-
-        // Used for returning data for tests.
-        res.locals.rateLimitTriggered = true
-        // console.log('res.locals: ', res.locals)
-
-        // Rate limited was triggered
-        res.status(429) // https://github.com/Bitcoin-com/rest.bitcoin.com/issues/330
-        return res.json({
-          error: `Too many requests. Your limits are currently ${rateLimit} requests per minute. Increase rate limits at https://fullstack.cash`
-        })
       }
     } catch (err) {
       wlogger.error('Error in route-ratelimit.js/newRateLimit(): ', err)
@@ -169,7 +200,7 @@ class RateLimits {
   // Calculates the points consumed, based on the jwt information and the route
   // requested.
   calcPoints (jwtInfo) {
-    let retVal = 30 // By default, use anonymous tier.
+    let retVal = ANON_LIMITS // By default, use anonymous tier.
 
     try {
       // console.log(`jwtInfo: ${JSON.stringify(jwtInfo, null, 2)}`)
@@ -186,22 +217,22 @@ class RateLimits {
       if (jwtInfo.id) {
         // SLP indexer routes
         if (level40Routes.includes(resource)) {
-          if (apiLevel >= 40) retVal = 1
+          if (apiLevel >= 40) retVal = 10
           // else if (apiLevel >= 10) retVal = 10
-          else retVal = 10
+          else retVal = ANON_LIMITS
 
           // Normal indexer routes
         } else if (level30Routes.includes(resource)) {
-          if (apiLevel >= 30) retVal = 1
-          else retVal = 10
+          if (apiLevel >= 30) retVal = 10
+          else retVal = ANON_LIMITS
 
           // Full node tier
         } else if (apiLevel >= 20) {
-          retVal = 1
+          retVal = 10
 
           // Free tier, full node only.
         } else {
-          retVal = 10
+          retVal = ANON_LIMITS
         }
       }
 
@@ -209,7 +240,7 @@ class RateLimits {
     } catch (err) {
       wlogger.error('Error in route-ratelimit.js/calcPoints()')
       // throw err
-      retVal = 30
+      retVal = ANON_LIMITS
     }
 
     return retVal

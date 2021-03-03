@@ -20,6 +20,13 @@ start-free-main.sh
 start-local-mainnet.sh.save
 start-local-testnet.sh.save
 temp.sh
+test-fullstack-test.sh
+start-sweet-main.sh
+test-sweet-main.sh
+test-fullstack-abc.sh
+test-fullstack-bchn.sh
+start-fullstack-abc.sh
+start-fullstack-bchn.sh
 
 coverage
 start-my-infra

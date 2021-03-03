@@ -33,7 +33,9 @@ util.inspect.defaultOptions = { depth: 1 }
 // let _this
 
 // Set default rate limit value for testing
-const PRO_PASSES = process.env.PRO_PASS ? process.env.PRO_PASS : 'BITBOX'
+const PRO_PASSES = process.env.PRO_PASS
+  ? process.env.PRO_PASS
+  : 'testpassword'
 // Convert the pro-tier password string into an array split by ':'.
 const PRO_PASS = PRO_PASSES.split(':')
 
@@ -46,6 +48,8 @@ class AuthMW {
 
     // Initialize passport for 'anonymous' authentication.
     passport.use(new AnonymousStrategy())
+
+    console.log(`PRO_PASS: ${JSON.stringify(PRO_PASS, null, 2)}`)
 
     // Initialize passport for 'basic' authentication.
     passport.use(
@@ -73,7 +77,7 @@ class AuthMW {
 
         // Evaluate the username and password and set the rate limit accordingly.
         // if (username === "BITBOX" && password === PRO_PASS) {
-        if (username === 'BITBOX') {
+        if (username === 'fullstackcash') {
           for (let i = 0; i < PRO_PASS.length; i++) {
             const thisPass = PRO_PASS[i]
 
@@ -82,6 +86,7 @@ class AuthMW {
 
               // Success
               req.locals.proLimit = true
+              console.log(`User ${req.ip} authenticated using Basic Auth`)
               break
             }
           }
@@ -96,6 +101,7 @@ class AuthMW {
 
   // Middleware called by the route.
   mw () {
+    console.log('Initializing passport')
     return passport.authenticate(['basic', 'anonymous'], {
       session: false
     })
