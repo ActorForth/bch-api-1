@@ -4,7 +4,7 @@ MAINTAINER Chris Troutner <chris.troutner@gmail.com>
 RUN apt-get update -y
 
 #Set the working directory to be the home directory
-WORKDIR /home/safeuser
+WORKDIR /home/safeuser/bch-api
 
 # Switch to user account.
 USER safeuser
@@ -12,13 +12,13 @@ USER safeuser
 #RUN echo 'abcd8765' | sudo -S pwd
 
 # Clone the repository
-WORKDIR /home/safeuser
-RUN git clone https://github.com/Permissionless-Software-Foundation/bch-api
-WORKDIR /home/safeuser/bch-api
-RUN npm install --silent
+# WORKDIR /home/safeuser
+# RUN git clone https://github.com/Permissionless-Software-Foundation/bch-api
+# WORKDIR /home/safeuser/bch-api
+# RUN npm install --silent
 
 # Generate documentation
-RUN npm run docs
+# RUN npm run docs
 
 EXPOSE 3000
 
