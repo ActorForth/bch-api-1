@@ -4,8 +4,6 @@ const express = require('express')
 
 // Middleware
 // const { routeRateLimit } = require("./middleware/route-ratelimit")
-const RateLimits = require('./middleware/route-ratelimit')
-const rateLimits = new RateLimits()
 
 const path = require('path')
 const logger = require('morgan')
@@ -96,17 +94,24 @@ app.use('/', logReqInfo)
 
 const v4prefix = 'v4'
 
-// Inspect the header for a JWT token.
-app.use(`/${v4prefix}/`, jwtAuth.getTokenFromHeaders)
+if (process.env.SECURITY === true) {
+  const RateLimits = require('./middleware/route-ratelimit')
+  const rateLimits = new RateLimits()
+  // Inspect the header for a JWT token.
+  app.use(`/${v4prefix}/`, jwtAuth.getTokenFromHeaders)
 
-// Instantiate the authorization middleware, used to implement pro-tier rate limiting.
-// Handles Anonymous and Basic Authorization schemes used by passport.js
-const auth = new AuthMW()
-app.use(`/${v4prefix}/`, auth.mw())
+  // Instantiate the authorization middleware, used to implement pro-tier rate limiting.
+  // Handles Anonymous and Basic Authorization schemes used by passport.js
+  const auth = new AuthMW()
+  app.use(`/${v4prefix}/`, auth.mw())
 
-// Rate limit on all v4 routes
-// Establish and enforce rate limits.
-app.use(`/${v4prefix}/`, rateLimits.rateLimitByResource)
+  // Rate limit on all v3 routes
+  // Establish and enforce rate limits.
+  // app.use(`/${v3prefix}/`, rateLimits.routeRateLimit)
+  // Rate limit on all v4 routes
+  // Establish and enforce rate limits.
+  app.use(`/${v4prefix}/`, rateLimits.rateLimitByResource)
+}
 
 // Connect v4 routes
 app.use(`/${v4prefix}/` + 'health-check', healthCheckV4)
@@ -208,11 +213,9 @@ function onError (error) {
     case 'EACCES':
       console.error(`${bind} requires elevated privileges`)
       process.exit(1)
-    // break
     case 'EADDRINUSE':
       console.error(`${bind} is already in use`)
       process.exit(1)
-    // break
     default:
       throw error
   }

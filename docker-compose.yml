@@ -1,0 +1,44 @@
+version: "3"
+services:
+    bch-api-regtest:
+        build: .
+        # dockerfile: Dockerfile
+        #image: bitcore
+        container_name: bch-api-regtest
+        # links:
+        #   - redis-test
+        ports:
+          - "3000:3000"
+          # volumes:
+          #   - ./:/home/safeuser/bch-api/
+
+
+        restart: always
+        environment:
+          - RPC_BASEURL=http://bitcoind-regtest:18332/
+          - RPC_USERNAME=regtest
+          - RPC_PASSWORD=regtest
+          - NETWORK=regtest
+          - SLPDB_URL=http://slpserve:4000/
+          # - BLOCKBOOK_URL=https://<Blockbook IP>:9131/
+          - NODE_TLS_REJECT_UNAUTHORIZED=0
+          - FULCRUM_URL=nginx-regtest
+          - FULCRUM_PORT=50002
+          - SECURITY=false
+          - TOKENSECRET=somelongpassword
+          # - REDIS_HOST=6379
+          # - REDIS_PORT=127.0.0.1
+        networks:
+          - bitcoin-bridging
+
+networks:
+  bitcoin-bridging:
+    external: true
+
+
+# redis-test:
+#   image: redis:latest
+#   container_name: redis-test
+#   restart: always
+#   ports:
+#     - "6380:6379"

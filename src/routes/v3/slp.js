@@ -16,10 +16,8 @@ const wlogger = require('../../util/winston-logging')
 // Instantiate a local copy of bch-js using the local REST API server.
 const LOCAL_RESTURL = process.env.LOCAL_RESTURL
   ? process.env.LOCAL_RESTURL
-  : 'https://api.fullstack.cash/v4/'
-
+  : 'https://api.fullstack.cash/v3/'
 const BCHJS = require('@psf/bch-js')
-// const BCHJS = require('../../../../bch-js')
 const bchjs = new BCHJS({ restURL: LOCAL_RESTURL })
 
 // Used to convert error messages to strings, to safely pass to users.
@@ -35,10 +33,7 @@ util.inspect.defaultOptions = { depth: 5 }
 
 // Determine the Access password for a private instance of SLPDB.
 // https://gist.github.com/christroutner/fc717ca704dec3dded8b52fae387eab2
-// Password for General Purpose (GP) SLPDB.
-const SLPDB_PASS_GP = process.env.SLPDB_PASS_GP ? process.env.SLPDB_PASS_GP : 'BITBOX'
-// Password for Whitelist (WL) SLPDB.
-const SLPDB_PASS_WL = process.env.SLPDB_PASS_WL ? process.env.SLPDB_PASS_WL : 'BITBOX'
+const SLPDB_PASS = process.env.SLPDB_PASS ? process.env.SLPDB_PASS : 'BITBOX'
 
 // const rawtransactions = require('./full-node/rawtransactions')
 const RawTransactions = require('./full-node/rawtransactions')
@@ -46,9 +41,9 @@ const rawTransactions = new RawTransactions()
 
 // Setup REST and TREST URLs used by slpjs
 // Dev note: this allows for unit tests to mock the URL.
-if (!process.env.REST_URL) process.env.REST_URL = 'https://bchn.fullstack.cash/v4/'
+if (!process.env.REST_URL) process.env.REST_URL = 'https://rest.bitcoin.com/v2/'
 if (!process.env.TREST_URL) {
-  process.env.TREST_URL = 'https://testnet.fullstack.cash/v4/'
+  process.env.TREST_URL = 'https://trest.bitcoin.com/v2/'
 }
 
 let _this
@@ -79,9 +74,6 @@ class Slp {
     _this.router.post('/validateTxid', _this.validateBulk)
     _this.router.get('/validateTxid/:txid', _this.validateSingle)
     _this.router.get('/validateTxid2/:txid', _this.validate2Single)
-    _this.router.get('/validateTxid3/:txid', _this.validate3Single)
-    _this.router.post('/validateTxid3', _this.validate3Bulk)
-    _this.router.get('/whitelist', _this.getSlpWhitelist)
     _this.router.get('/txDetails/:txid', _this.txDetails)
     _this.router.get('/tokenStats/:tokenId', _this.tokenStats)
     _this.router.get(
@@ -94,8 +86,6 @@ class Slp {
     )
     _this.router.post('/generateSendOpReturn', _this.generateSendOpReturn)
     _this.router.post('/hydrateUtxos', _this.hydrateUtxos)
-    _this.router.post('/hydrateUtxosWL', _this.hydrateUtxosWL)
-    _this.router.get('/status', _this.getStatus)
   }
 
   // DRY error handler.
@@ -164,7 +154,7 @@ class Slp {
    *
    *
    * @apiExample Example usage:
-   * curl -X GET "https://api.fullstack.cash/v4/slp/list/259908ae44f46ef585edef4bcc1e50dc06e4c391ac4be929fae27235b8158cf1" -H "accept:application/json"
+   * curl -X GET "https://api.fullstack.cash/v3/slp/list/259908ae44f46ef585edef4bcc1e50dc06e4c391ac4be929fae27235b8158cf1" -H "accept:application/json"
    *
    *
    */
@@ -197,7 +187,7 @@ class Slp {
    *
    *
    * @apiExample Example usage:
-   * curl -X POST "https://api.fullstack.cash/v4/slp/list" -H "accept:application/json" -H "Content-Type: application/json" -d '{"tokenIds":["7380843cd1089a1a01783f86af37734dc99667a1cdc577391b5f6ea42fc1bfb4","9ba379fe8171176d4e7e6771d9a24cd0e044c7b788d5f86a3fdf80904832b2c0"]}'
+   * curl -X POST "https://api.fullstack.cash/v3/slp/list" -H "accept:application/json" -H "Content-Type: application/json" -d '{"tokenIds":["7380843cd1089a1a01783f86af37734dc99667a1cdc577391b5f6ea42fc1bfb4","9ba379fe8171176d4e7e6771d9a24cd0e044c7b788d5f86a3fdf80904832b2c0"]}'
    *
    *
    */
@@ -345,7 +335,7 @@ class Slp {
    *
    *
    * @apiExample Example usage:
-   * curl -X GET "https://api.fullstack.cash/v4/slp/balancesForAddress/simpleledger:qz9tzs6d5097ejpg279rg0rnlhz546q4fsnck9wh5m" -H "accept:application/json"
+   * curl -X GET "https://api.fullstack.cash/v3/slp/balancesForAddress/simpleledger:qz9tzs6d5097ejpg279rg0rnlhz546q4fsnck9wh5m" -H "accept:application/json"
    *
    *
    */
@@ -370,7 +360,6 @@ class Slp {
       }
 
       // Prevent a common user error. Ensure they are using the correct network address.
-      // const cashAddr = _this.bchjs.SLP.Address.toCashAddress(address)
       const networkIsValid = _this.routeUtils.validateNetwork(address)
       if (!networkIsValid) {
         res.status(400)
@@ -437,7 +426,7 @@ class Slp {
       const b64 = Buffer.from(s).toString('base64')
       const url = `${process.env.SLPDB_URL}q/${b64}`
 
-      const options = _this.generateCredentialsGP()
+      const options = _this.generateCredentials()
       // Request options
       const opt = {
         method: 'get',
@@ -529,7 +518,7 @@ class Slp {
    *
    *
    * @apiExample Example usage:
-   * curl -X POST "https://api.fullstack.cash/v4/slp/balancesForAddress" -d "{\"addresses\":[\"simpleledger:qqss4zp80hn6szsa4jg2s9fupe7g5tcg5ucdyl3r57\"]}" -H "accept:application/json"
+   * curl -X POST "https://api.fullstack.cash/v3/slp/balancesForAddress" -d "{\"addresses\":[\"simpleledger:qqss4zp80hn6szsa4jg2s9fupe7g5tcg5ucdyl3r57\"]}" -H "accept:application/json"
    *
    *
    */
@@ -577,7 +566,6 @@ class Slp {
         }
 
         // Prevent a common user error. Ensure they are using the correct network address.
-        // const cashAddr = _this.bchjs.SLP.Address.toCashAddress(address)
         const networkIsValid = _this.routeUtils.validateNetwork(address)
         if (!networkIsValid) {
           res.status(400)
@@ -588,7 +576,7 @@ class Slp {
         }
       }
 
-      const options = _this.generateCredentialsGP()
+      const options = _this.generateCredentials()
 
       // Collect an array of promises, one for each request to slpserve.
       // This is a nested array of promises.
@@ -744,7 +732,7 @@ class Slp {
    *
    *
    * @apiExample Example usage:
-   * curl -X GET "https://api.fullstack.cash/v4/slp/balancesForToken/9ba379fe8171176d4e7e6771d9a24cd0e044c7b788d5f86a3fdf80904832b2c0" -H "accept:application/json"
+   * curl -X GET "https://api.fullstack.cash/v3/slp/balancesForToken/9ba379fe8171176d4e7e6771d9a24cd0e044c7b788d5f86a3fdf80904832b2c0" -H "accept:application/json"
    *
    *
    */
@@ -810,7 +798,7 @@ class Slp {
       const b64 = Buffer.from(s).toString('base64')
       const url = `${process.env.SLPDB_URL}q/${b64}`
 
-      const options = _this.generateCredentialsGP()
+      const options = _this.generateCredentials()
       const opt = {
         method: 'get',
         baseURL: url,
@@ -851,7 +839,7 @@ class Slp {
    *
    *
    * @apiExample Example usage:
-   * curl -X GET "https://api.fullstack.cash/v4/slp/convert/simpleledger:qz9tzs6d5097ejpg279rg0rnlhz546q4fsnck9wh5m" -H "accept:application/json"
+   * curl -X GET "https://api.fullstack.cash/v3/slp/convert/simpleledger:qz9tzs6d5097ejpg279rg0rnlhz546q4fsnck9wh5m" -H "accept:application/json"
    *
    *
    */
@@ -897,7 +885,7 @@ class Slp {
    *
    *
    * @apiExample Example usage:
-   * curl -X POST "https://api.fullstack.cash/v4/slp/convert" -H "accept:application/json" -H "Content-Type: application/json" -d '{"addresses":["simpleledger:qrxa0unrn67rtn85v7asfddhhth43ecnxua0antk2l"]}'
+   * curl -X POST "https://api.fullstack.cash/v3/slp/convert" -H "accept:application/json" -H "Content-Type: application/json" -d '{"addresses":["simpleledger:qrxa0unrn67rtn85v7asfddhhth43ecnxua0antk2l"]}'
    *
    *
    */
@@ -959,7 +947,7 @@ class Slp {
    *
    *
    * @apiExample Example usage:
-   * curl -X POST "https://api.fullstack.cash/v4/slp/validateTxid" -H "accept:application/json" -H "Content-Type: application/json" -d '{"txids":["f7e5199ef6669ad4d078093b3ad56e355b6ab84567e59ad0f08a5ad0244f783a","fb0eeaa501a6e1acb721669c62a3f70741f48ae0fd7f4b8e1d72088785c51952"]}'
+   * curl -X POST "https://api.fullstack.cash/v3/slp/validateTxid" -H "accept:application/json" -H "Content-Type: application/json" -d '{"txids":["f7e5199ef6669ad4d078093b3ad56e355b6ab84567e59ad0f08a5ad0244f783a","fb0eeaa501a6e1acb721669c62a3f70741f48ae0fd7f4b8e1d72088785c51952"]}'
    *
    *
    */
@@ -997,9 +985,8 @@ class Slp {
       const s = JSON.stringify(query)
       const b64 = Buffer.from(s).toString('base64')
       const url = `${process.env.SLPDB_URL}q/${b64}`
-      // console.log('url: ', url)
 
-      const options = _this.generateCredentialsGP()
+      const options = _this.generateCredentials()
 
       // Get data from SLPDB.
       const opt = {
@@ -1013,7 +1000,7 @@ class Slp {
 
       let formattedTokens = []
 
-      // Combine the confirmed and unconfirmed collections.
+      // Combine the arrays. Why? Generally there is nothing in the u array.
       const concatArray = tokenRes.data.c.concat(tokenRes.data.u)
 
       const tokenIds = []
@@ -1035,27 +1022,15 @@ class Slp {
         })
 
         // If a user-provided txid doesn't exist in the data, add it with
-        // valid:null property.
-        // 'null' indicates that SLPDB does not know about the transaction. It
-        // either has not seen it or has not processed it yet. A determination
-        // can not be made.
+        // valid:false property.
         txids.forEach((txid) => {
           if (!tokenIds.includes(txid)) {
             formattedTokens.push({
               txid: txid,
-              valid: null
+              valid: false
             })
           }
         })
-      } else {
-        // Corner case: No results were returned from SLPDB. Mark each entry
-        // as 'null'
-        for (let i = 0; i < txids.length; i++) {
-          formattedTokens.push({
-            txid: txids[i],
-            valid: null
-          })
-        }
       }
 
       // Catch a corner case of repeated txids. SLPDB will remove redundent TXIDs,
@@ -1075,21 +1050,8 @@ class Slp {
         formattedTokens = newOutput
       }
 
-      // Put the output array in the same order as the input array.
-      const outAry = []
-      for (let i = 0; i < txids.length; i++) {
-        const thisTxid = txids[i]
-
-        // Need to use Array.find() because the returned output array is out
-        // of order with respect to the txid input array.
-        const output = formattedTokens.find((elem) => elem.txid === thisTxid)
-        // console.log(`output: ${JSON.stringify(output, null, 2)}`)
-
-        outAry.push(output)
-      }
-
       res.status(200)
-      return res.json(outAry)
+      return res.json(formattedTokens)
     } catch (err) {
       wlogger.error('Error in slp.ts/validateBulk().', err)
 
@@ -1105,7 +1067,7 @@ class Slp {
    *
    *
    * @apiExample Example usage:
-   * curl -X GET "https://api.fullstack.cash/v4/slp/validateTxid/f7e5199ef6669ad4d078093b3ad56e355b6ab84567e59ad0f08a5ad0244f783a" -H "accept:application/json"
+   * curl -X GET "https://api.fullstack.cash/v3/slp/validateTxid/f7e5199ef6669ad4d078093b3ad56e355b6ab84567e59ad0f08a5ad0244f783a" -H "accept:application/json"
    *
    *
    */
@@ -1133,7 +1095,7 @@ class Slp {
         }
       }
 
-      const options = _this.generateCredentialsGP()
+      const options = _this.generateCredentials()
 
       const s = JSON.stringify(query)
       const b64 = Buffer.from(s).toString('base64')
@@ -1146,12 +1108,11 @@ class Slp {
       }
       // Get data from SLPDB.
       const tokenRes = await _this.axios.request(opt)
-      // console.log(`tokenRes.data: ${JSON.stringify(tokenRes.data, null, 2)}`)
 
       // Default return value.
       let result = {
         txid: txid,
-        valid: null
+        valid: false
       }
 
       // Build result.
@@ -1169,15 +1130,15 @@ class Slp {
       res.status(200)
       return res.json(result)
     } catch (err) {
-      wlogger.error('Error in slp.js/validateSingle().', err)
+      wlogger.error('Error in slp.ts/validateSingle().', err)
 
       return _this.errorHandler(err, res)
     }
   }
 
   /**
-   * @api {get} /slp/validateTxid2/{txid}  Validate 2 Single
-   * @apiName Validate a single SLP transaction by txid using slp-validate.
+   * @api {get} /slp/validateTxid2/{txid}  Validate single SLP transaction by txid.
+   * @apiName Validate single SLP transaction by txid.
    * @apiGroup SLP
    * @apiDescription Validate single SLP transaction by txid, using slp-validate.
    * Slower, less efficient method of validating an SLP TXID using the slp-validate
@@ -1186,7 +1147,7 @@ class Slp {
    *
    *
    * @apiExample Example usage:
-   * curl -X GET "https://api.fullstack.cash/v4/slp/validateTxid2/f7e5199ef6669ad4d078093b3ad56e355b6ab84567e59ad0f08a5ad0244f783a" -H "accept:application/json"
+   * curl -X GET "https://api.fullstack.cash/v3/slp/validateTxid2/f7e5199ef6669ad4d078093b3ad56e355b6ab84567e59ad0f08a5ad0244f783a" -H "accept:application/json"
    *
    *
    */
@@ -1237,299 +1198,6 @@ class Slp {
   }
 
   /**
-   * @api {get} /slp/whitelist SLP token whitelist.
-   * @apiName SLP token whitelist
-   * @apiGroup SLP
-   * @apiDescription Get tokens that are on the whitelist.
-   * SLPDB is typically used to validate SLP transactions. It can become unstable
-   * during periods of high network usage. A second SLPDB has been implemented
-   * that is much more stable, because it only tracks a whitelist of SLP tokens.
-   * This endpoint will return information on the SLP tokens that are included
-   * in that whitelist.
-   *
-   * For tokens on the whitelist, the /slp/validateTxid3 endpoints can be used.
-   *
-   *
-   * @apiExample Example usage:
-   * curl -X GET "https://api.fullstack.cash/v4/slp/whitelist" -H "accept:application/json"
-   *
-   */
-  async getSlpWhitelist (req, res, next) {
-    try {
-      const list = [
-        {
-          name: 'USDH',
-          tokenId:
-            'c4b0d62156b3fa5c8f3436079b5394f7edc1bef5dc1cd2f9d0c4d46f82cca479'
-        },
-        {
-          name: 'SPICE',
-          tokenId:
-            '4de69e374a8ed21cbddd47f2338cc0f479dc58daa2bbe11cd604ca488eca0ddf'
-        },
-        {
-          name: 'PSF',
-          tokenId:
-            '38e97c5d7d3585a2cbf3f9580c82ca33985f9cb0845d4dcce220cb709f9538b0'
-        },
-        {
-          name: 'TROUT',
-          tokenId:
-            'a4fb5c2da1aa064e25018a43f9165040071d9e984ba190c222a7f59053af84b2'
-        },
-        {
-          name: 'PSFTEST',
-          tokenId:
-            'd0ef4de95b78222bfee2326ab11382f4439aa0855936e2fe6ac129a8d778baa0'
-        }
-      ]
-
-      res.status(200)
-      return res.json(list)
-    } catch (err) {
-      wlogger.error('Error in slp.ts/whitelist().', err)
-
-      return _this.errorHandler(err, res)
-    }
-  }
-
-  /**
-   * @api {get} /slp/validateTxid3/{txid}  Validate 3 Single
-   * @apiName Validate a single txid against a whitelist SLPDB
-   * @apiGroup SLP
-   * @apiDescription Alternative validation for tokens on the whitelist
-   * This endpoint is exactly the same as /slp/validateTxid/{txid} but it uses
-   * a different SLPDB. This server only indexes the SLP tokens that are on the
-   * whitelist. You can see which tokens are on the whitelist by calling the
-   * /slp/whitelist endpoint.
-   *
-   * @apiExample Example usage:
-   * curl -X GET "https://api.fullstack.cash/v4/slp/validateTxid3/f7e5199ef6669ad4d078093b3ad56e355b6ab84567e59ad0f08a5ad0244f783a" -H "accept:application/json"
-   *
-   *
-   */
-  async validate3Single (req, res, next) {
-    try {
-      const txid = req.params.txid
-      // console.log('validate3Single txid: ', txid)
-
-      // Validate input
-      if (!txid || txid === '') {
-        res.status(400)
-        return res.json({ error: 'txid can not be empty' })
-      }
-
-      wlogger.debug('Executing slp/validate/:txid with this txid: ', txid)
-
-      const query = {
-        v: 3,
-        q: {
-          db: ['c', 'u'],
-          find: {
-            'tx.h': txid
-          },
-          limit: 300,
-          project: { 'slp.valid': 1, 'tx.h': 1, 'slp.invalidReason': 1 }
-        }
-      }
-
-      const options = _this.generateCredentialsWL()
-
-      const s = JSON.stringify(query)
-      const b64 = Buffer.from(s).toString('base64')
-      const url = `${process.env.SLPDB_WHITELIST_URL}q/${b64}`
-      const opt = {
-        method: 'get',
-        baseURL: url,
-        headers: options.headers,
-        timeout: options.timeout
-      }
-      // Get data from SLPDB.
-      const tokenRes = await _this.axios.request(opt)
-      // console.log(`tokenRes.data: ${JSON.stringify(tokenRes.data, null, 2)}`)
-
-      // Default return value.
-      let result = {
-        txid: txid,
-        valid: null
-      }
-
-      // Build result.
-      const concatArray = tokenRes.data.c.concat(tokenRes.data.u)
-      if (concatArray.length > 0) {
-        result = {
-          txid: concatArray[0].tx.h,
-          valid: concatArray[0].slp.valid
-        }
-        if (!result.valid) {
-          result.invalidReason = concatArray[0].slp.invalidReason
-        }
-      }
-
-      res.status(200)
-      return res.json(result)
-    } catch (err) {
-      wlogger.error('Error in slp.js/validate3Single().', err)
-
-      return _this.errorHandler(err, res)
-    }
-  }
-
-  /**
-   * @api {post} /slp/validateTxid3/  Validate 3 Bulk
-   * @apiName Validate an array of TXIDs against a whitelist SLPDB
-   * @apiGroup SLP
-   * @apiDescription Alternative validation for tokens on the whitelist
-   * This endpoint is exactly the same as /slp/validateTxid but it uses
-   * a different SLPDB. This server only indexes the SLP tokens that are on the
-   * whitelist. You can see which tokens are on the whitelist by calling the
-   * /slp/whitelist endpoint.
-   *
-   * @apiExample Example usage:
-   * curl -X POST "https://api.fullstack.cash/v4/slp/validateTxid3" -H "accept:application/json" -H "Content-Type: application/json" -d '{"txids":["f7e5199ef6669ad4d078093b3ad56e355b6ab84567e59ad0f08a5ad0244f783a","fb0eeaa501a6e1acb721669c62a3f70741f48ae0fd7f4b8e1d72088785c51952"]}'
-   *
-   *
-   */
-  async validate3Bulk (req, res, next) {
-    try {
-      const txids = req.body.txids
-      // console.log(`validate3Bulk txids: `, txids)
-
-      // Reject if txids is not an array.
-      if (!Array.isArray(txids)) {
-        res.status(400)
-        return res.json({ error: 'txids needs to be an array' })
-      }
-
-      // Enforce array size rate limits
-      if (!_this.routeUtils.validateArraySize(req, txids)) {
-        res.status(429) // https://github.com/Bitcoin-com/rest.bitcoin.com/issues/330
-        return res.json({
-          error: 'Array too large.'
-        })
-      }
-
-      wlogger.debug('Executing slp/validate with these txids: ', txids)
-
-      const query = {
-        v: 3,
-        q: {
-          db: ['c', 'u'],
-          find: {
-            'tx.h': { $in: txids }
-          },
-          limit: 300,
-          project: { 'slp.valid': 1, 'tx.h': 1, 'slp.invalidReason': 1 }
-        }
-      }
-      const s = JSON.stringify(query)
-      const b64 = Buffer.from(s).toString('base64')
-      const url = `${process.env.SLPDB_WHITELIST_URL}q/${b64}`
-      // console.log('url: ', url)
-
-      const options = _this.generateCredentialsWL()
-
-      // Get data from SLPDB.
-      const opt = {
-        method: 'get',
-        baseURL: url,
-        headers: options.headers,
-        timeout: options.timeout
-      }
-      const tokenRes = await _this.axios.request(opt)
-      // console.log(`tokenRes.data: ${JSON.stringify(tokenRes.data, null, 2)}`)
-
-      let formattedTokens = []
-
-      // Combine the confirmed and unconfirmed collections.
-      const concatArray = tokenRes.data.c.concat(tokenRes.data.u)
-
-      const tokenIds = []
-      if (concatArray.length > 0) {
-        concatArray.forEach((token) => {
-          tokenIds.push(token.tx.h) // txid
-
-          const validationResult = {
-            txid: token.tx.h,
-            valid: token.slp.valid
-          }
-
-          // If the txid is invalid, add the reason it's invalid.
-          if (!validationResult.valid) {
-            validationResult.invalidReason = token.slp.invalidReason
-          }
-
-          formattedTokens.push(validationResult)
-        })
-
-        // If a user-provided txid doesn't exist in the data, add it with
-        // valid:null property.
-        // 'null' indicates that SLPDB does not know about the transaction. It
-        // either has not seen it or has not processed it yet. A determination
-        // can not be made.
-        txids.forEach((txid) => {
-          if (!tokenIds.includes(txid)) {
-            formattedTokens.push({
-              txid: txid,
-              valid: null
-            })
-          }
-        })
-      } else {
-        // Corner case: No results were returned from SLPDB. Mark each entry
-        // as 'null'
-        for (let i = 0; i < txids.length; i++) {
-          formattedTokens.push({
-            txid: txids[i],
-            valid: null
-          })
-        }
-      }
-
-      // Catch a corner case of repeated txids. SLPDB will remove redundent TXIDs,
-      // which will cause the output array to be smaller than the input array.
-      if (txids.length > formattedTokens.length) {
-        const newOutput = []
-        for (let i = 0; i < txids.length; i++) {
-          const thisTxid = txids[i]
-
-          // Find the element that matches the current txid.
-          const elem = formattedTokens.filter((x) => x.txid === thisTxid)
-
-          newOutput.push(elem[0])
-        }
-
-        // Replace the original output object with the new output object.
-        formattedTokens = newOutput
-      }
-
-      // console.log(
-      //   `formattedTokens: ${JSON.stringify(formattedTokens, null, 2)}`
-      // )
-
-      // Put the output array in the same order as the input array.
-      const outAry = []
-      for (let i = 0; i < txids.length; i++) {
-        const thisTxid = txids[i]
-
-        // Need to use Array.find() because the returned output array is out
-        // of order with respect to the txid input array.
-        const output = formattedTokens.find((elem) => elem.txid === thisTxid)
-        // console.log(`output: ${JSON.stringify(output, null, 2)}`)
-
-        outAry.push(output)
-      }
-
-      res.status(200)
-      return res.json(outAry)
-    } catch (err) {
-      wlogger.error('Error in slp.js/validate3Bulk().', err)
-
-      return _this.errorHandler(err, res)
-    }
-  }
-
-  /**
    * @api {get} /slp/txDetails/{txid}  SLP transaction details.
    * @apiName SLP transaction details.
    * @apiGroup SLP
@@ -1537,7 +1205,7 @@ class Slp {
    *
    *
    * @apiExample Example usage:
-   * curl -X GET "https://api.fullstack.cash/v4/slp/txDetails/8ab4ac5dea3f9024e3954ee5b61452955d659a34561f79ef62ac44e133d0980e" -H "accept:application/json"
+   * curl -X GET "https://api.fullstack.cash/v3/slp/txDetails/8ab4ac5dea3f9024e3954ee5b61452955d659a34561f79ef62ac44e133d0980e" -H "accept:application/json"
    *
    *
    */
@@ -1570,7 +1238,7 @@ class Slp {
       const b64 = Buffer.from(s).toString('base64')
       const url = `${process.env.SLPDB_URL}q/${b64}`
 
-      const options = _this.generateCredentialsGP()
+      const options = _this.generateCredentials()
       const opt = {
         method: 'get',
         baseURL: url,
@@ -1629,7 +1297,7 @@ class Slp {
    *
    *
    * @apiExample Example usage:
-   * curl -X GET "https://api.fullstack.cash/v4/slp/tokenStats/9ba379fe8171176d4e7e6771d9a24cd0e044c7b788d5f86a3fdf80904832b2c0" -H "accept:application/json"
+   * curl -X GET "https://api.fullstack.cash/v3/slp/tokenStats/9ba379fe8171176d4e7e6771d9a24cd0e044c7b788d5f86a3fdf80904832b2c0" -H "accept:application/json"
    *
    *
    */
@@ -1660,7 +1328,7 @@ class Slp {
    *
    *
    * @apiExample Example usage:
-   * curl -X GET "https://api.fullstack.cash/v4/slp/transactions/9ba379fe8171176d4e7e6771d9a24cd0e044c7b788d5f86a3fdf80904832b2c0/simpleledger:qrxa0unrn67rtn85v7asfddhhth43ecnxua0antk2l" -H "accept:application/json"
+   * curl -X GET "https://api.fullstack.cash/v3/slp/transactions/9ba379fe8171176d4e7e6771d9a24cd0e044c7b788d5f86a3fdf80904832b2c0/simpleledger:qrxa0unrn67rtn85v7asfddhhth43ecnxua0antk2l" -H "accept:application/json"
    *
    *
    */
@@ -1730,32 +1398,11 @@ class Slp {
   }
 
   // Generates a Basic Authorization header for slpserve.
-  generateCredentialsGP () {
+  generateCredentials () {
     // Generate the Basic Authentication header for a private instance of SLPDB.
     const username = 'BITBOX'
-    const password = SLPDB_PASS_GP
+    const password = SLPDB_PASS
     const combined = `${username}:${password}`
-    // console.log(`combined: ${combined}`)
-    var base64Credential = Buffer.from(combined).toString('base64')
-    var readyCredential = `Basic ${base64Credential}`
-
-    const options = {
-      headers: {
-        authorization: readyCredential
-      },
-      timeout: 15000
-    }
-
-    return options
-  }
-
-  // Generates a Basic Authorization header for slpserve.
-  generateCredentialsWL () {
-    // Generate the Basic Authentication header for a private instance of SLPDB.
-    const username = 'BITBOX'
-    const password = SLPDB_PASS_WL
-    const combined = `${username}:${password}`
-    // console.log(`combined: ${combined}`)
     var base64Credential = Buffer.from(combined).toString('base64')
     var readyCredential = `Basic ${base64Credential}`
 
@@ -1841,7 +1488,6 @@ class Slp {
       }
 
       // Ensure it is using the correct network.
-      // const cashAddr = _this.bchjs.SLP.Address.toCashAddress(address)
       const networkIsValid = routeUtils.validateNetwork(address)
       if (!networkIsValid) {
         res.status(400)
@@ -1886,7 +1532,7 @@ class Slp {
    * (1 or 2) will also be returned.
    *
    * @apiExample Example usage:
-   * curl -X POST "https://api.fullstack.cash/v4/slp/generateSendOpReturn" -H "accept:application/json" -H "Content-Type: application/json" -d '{"tokenUtxos":[{"tokenId": "0a321bff9761f28e06a268b14711274bb77617410a16807bd0437ef234a072b1","decimals": 0, "tokenQty": 2}], "sendQty": 1.5}'
+   * curl -X POST "https://api.fullstack.cash/v3/slp/generateSendOpReturn" -H "accept:application/json" -H "Content-Type: application/json" -d '{"tokenUtxos":[{"tokenId": "0a321bff9761f28e06a268b14711274bb77617410a16807bd0437ef234a072b1","decimals": 0, "tokenQty": 2}], "sendQty": 1.5}'
    *
    *
    */
@@ -1925,8 +1571,6 @@ class Slp {
         })
       }
 
-      // console.log('sendQty: ', sendQty)
-      // console.log(`tokenUtxos: `, tokenUtxos)
       const opReturn = await _this.bchjs.SLP.TokenType1.generateSendOpReturn(
         tokenUtxos,
         sendQty
@@ -1938,7 +1582,6 @@ class Slp {
       res.status(200)
       return res.json({ script, outputs: opReturn.outputs })
     } catch (err) {
-      console.log('err: ', err)
       wlogger.error('Error in slp.js/generateSendOpReturn().', err)
 
       // Decode the error message.
@@ -1971,25 +1614,13 @@ class Slp {
    * not been confirmed.
    *
    * @apiExample Example usage:
-   * curl -X POST "https://api.fullstack.cash/v4/slp/hydrateUtxos" -H "accept:application/json" -H "Content-Type: application/json" -d '{"utxos":[{"utxos":[{"txid": "d56a2b446d8149c39ca7e06163fe8097168c3604915f631bc58777d669135a56","vout": 3, "value": "6816", "height": 606848, "confirmations": 13, "satoshis": 6816}, {"txid": "d56a2b446d8149c39ca7e06163fe8097168c3604915f631bc58777d669135a56","vout": 2, "value": "546", "height": 606848, "confirmations": 13, "satoshis": 546}]}]}'
+   * curl -X POST "https://api.fullstack.cash/v3/slp/hydrateUtxos" -H "accept:application/json" -H "Content-Type: application/json" -d '{"utxos":[{"utxos":[{"txid": "d56a2b446d8149c39ca7e06163fe8097168c3604915f631bc58777d669135a56","vout": 3, "value": "6816", "height": 606848, "confirmations": 13, "satoshis": 6816}, {"txid": "d56a2b446d8149c39ca7e06163fe8097168c3604915f631bc58777d669135a56","vout": 2, "value": "546", "height": 606848, "confirmations": 13, "satoshis": 546}]}]}'
    *
    *
    */
   async hydrateUtxos (req, res, next) {
     try {
       const utxos = req.body.utxos
-
-      // console.log('req: ', req)
-      // console.log(`req._remoteAddress: ${req._remoteAddress}`)
-
-      // Generate a user object that can be passed along with internal calls
-      // from bch-js.
-      const usrObj = {
-        ip: req._remoteAddress,
-        jwtToken: req.locals.jwtToken,
-        proLimit: req.locals.proLimit,
-        apiLevel: req.locals.apiLevel
-      }
 
       // Validate inputs
       if (!Array.isArray(utxos)) {
@@ -2025,8 +1656,8 @@ class Slp {
         const theseUtxos = utxos[i].utxos
 
         // Get SLP token details.
-        const details = await _this.bchjs.SLP.Utils.tokenUtxoDetails(theseUtxos, usrObj)
-        // console.log('details: ', details)
+        const details = await _this.bchjs.SLP.Utils.tokenUtxoDetails(theseUtxos)
+        // console.log('details : ', details)
 
         // Replace the original UTXO data with the hydrated data.
         utxos[i].utxos = details
@@ -2040,146 +1671,15 @@ class Slp {
 
       // Decode the error message.
       const { msg, status } = routeUtils.decodeError(err)
-      console.log('msg: ', msg)
-      console.log('status: ', status)
       if (msg) {
         res.status(status)
-        return res.json({ error: msg, message: msg, success: false })
+        return res.json({ error: msg })
       }
 
       res.status(500)
       return res.json({
         error: 'Error in hydrateUtxos()'
       })
-    }
-  }
-
-  /**
-   * @api {post} /slp/hydrateUtxosWL/ hydrateUtxosWL
-   * @apiName SLP hydrateUtxosWL
-   * @apiGroup SLP
-   * @apiDescription Hydrate UTXO data with SLP information, using only the whitelist SLPDB.
-   *
-   * This call is identical to `hydrateUtxos`, except it will only use the
-   * filtered SLPDB with a whitelist. This results in faster performance, more
-   * reliable uptime, but more frequent `isValid: null` values. Some use-cases
-   * prioritize the speed and reliability over acceptance of a wide range of
-   * SLP tokens.
-   *
-   * @apiExample Example usage:
-   * curl -X POST "https://api.fullstack.cash/v4/slp/hydrateUtxosWL" -H "accept:application/json" -H "Content-Type: application/json" -d '{"utxos":[{"utxos":[{"txid": "d56a2b446d8149c39ca7e06163fe8097168c3604915f631bc58777d669135a56","vout": 3, "value": "6816", "height": 606848, "confirmations": 13, "satoshis": 6816}, {"txid": "d56a2b446d8149c39ca7e06163fe8097168c3604915f631bc58777d669135a56","vout": 2, "value": "546", "height": 606848, "confirmations": 13, "satoshis": 546}]}]}'
-   *
-   *
-   */
-  async hydrateUtxosWL (req, res, next) {
-    try {
-      const utxos = req.body.utxos
-
-      // Validate inputs
-      if (!Array.isArray(utxos)) {
-        res.status(422)
-        return res.json({
-          error: 'Input must be an array.'
-        })
-      }
-
-      if (!utxos.length) {
-        res.status(422)
-        return res.json({
-          error: 'Array should not be empty'
-        })
-      }
-
-      if (utxos.length > 20) {
-        res.status(422)
-        return res.json({
-          error: 'Array too long, max length is 20'
-        })
-      }
-
-      if (!utxos[0].utxos) {
-        res.status(422)
-        return res.json({
-          error: 'Each element in array should have a utxos property'
-        })
-      }
-
-      // Loop through each address and query the UTXOs for that element.
-      for (let i = 0; i < utxos.length; i++) {
-        const theseUtxos = utxos[i].utxos
-        // console.log(`theseUtxos: ${JSON.stringify(theseUtxos, null, 2)}`)
-
-        // Get SLP token details.
-        const details = await _this.bchjs.SLP.Utils.tokenUtxoDetailsWL(theseUtxos)
-        // console.log('details : ', details)
-
-        // Replace the original UTXO data with the hydrated data.
-        utxos[i].utxos = details
-      }
-
-      res.status(200)
-      return res.json({ slpUtxos: utxos })
-    } catch (err) {
-      wlogger.error('Error in slp.js/hydrateUtxosWL().', err)
-      console.error('Error in slp.js/hydrateUtxosWL().', err)
-
-      // Decode the error message.
-      const { msg, status } = routeUtils.decodeError(err)
-      console.log('msg: ', msg)
-      console.log('status: ', status)
-      if (msg) {
-        res.status(status)
-        return res.json({ error: msg, message: msg, success: false })
-      }
-
-      res.status(500)
-      return res.json({
-        error: 'Error in hydrateUtxosWL()',
-        message: 'Error in hydrateUtxosWL()'
-      })
-    }
-  }
-
-  /**
-   * @api {get} /slp/status Get the health status of SLPDB
-   * @apiName Get the health status of SLPDB
-   * @apiGroup SLP
-   * @apiDescription Get the health status of SLPDB
-   *
-   *
-   * @apiExample Example usage:
-   * curl -X GET "https://api.fullstack.cash/v4/slp/status" -H "accept:application/json" -H "Content-Type: application/json"
-   *
-   */
-  async getStatus (req, res, next) {
-    try {
-      const query = {
-        v: 3,
-        q: {
-          db: ['s'],
-          find: { context: 'SLPDB' },
-          limit: 10
-        }
-      }
-
-      const s = JSON.stringify(query)
-      const b64 = Buffer.from(s).toString('base64')
-      const url = `${process.env.SLPDB_URL}q/${b64}`
-      // Request options
-      const opt = {
-        method: 'get',
-        baseURL: url
-      }
-      const tokenRes = await _this.axios.request(opt)
-
-      const status = tokenRes.data.s[0]
-
-      res.status(200)
-      return res.json(status)
-    } catch (err) {
-      // console.log(err)
-      wlogger.error('Error in slp.js/getStatus().', err)
-      return _this.errorHandler(err, res)
     }
   }
 }
