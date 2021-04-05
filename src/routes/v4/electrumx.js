@@ -72,9 +72,16 @@ class Electrum {
 
       // Return immediately if a connection has already been established.
       if (_this.isReady) return true
+      
+      try {
+        await _this.electrumx.connect()
 
+      } catch (err) {
+              console.log('err: ', err)
+
+      }
       // Connect to the server.
-      await _this.electrumx.connect()
+      
 
       // Set the connection flag.
       _this.isReady = true
@@ -94,7 +101,11 @@ class Electrum {
         }
       }, 30000)
 
-      console.log('...Successfully connected to ElectrumX server.')
+      if (_this.electrumx.connection.status == 1){
+        console.log('...Successfully connected to ElectrumX server.')
+      } else {
+        console.log('... retrying connection')
+      }
 
       // console.log(`_this.isReady: ${_this.isReady}`)
       return _this.isReady
