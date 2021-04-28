@@ -4,6 +4,8 @@
 
 [![Build Status](https://travis-ci.org/christroutner/bch-api.svg?branch=master)](https://travis-ci.org/christroutner/bch-api)
 
+**Deprecation Warning:** This repository has been moved to the [Permissionless Software Foundation bch-api repository](https://github.com/Permissionless-Software-Foundation/bch-api). This repository is deprecated. [@chris.troutner/bch-api v1.0.0](https://www.npmjs.com/package/@chris.troutner/bch-api) is the last version published from this repository. [@psf/bch-api v1.1.0+](https://github.com/Permissionless-Software-Foundation/bch-api) is the continuation of the library.
+
 This is a fork and alternative implementation of
 the [rest.bitcoin.com](https://github.com/Bitcoin-com/rest.bitcoin.com) repository.
 The purpose of this code is to create a REST API server that provides a common
