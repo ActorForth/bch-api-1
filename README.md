@@ -5,7 +5,12 @@
 
 This is a REST API server, written in node.js JavaScript, using [Express.js](https://expressjs.com/) framework. The purpose of this code is to create a REST API server that provides a common interface for working with a Bitcoin Cash full node and various indexers. See [this article](https://psfoundation.cash/blog/cash-stack) to learn about the 'Cash Stack'. Visit [FullStack.cash](https://fullstack.cash), sign up for a free account, and use this REST API right away with the [bch-js](https://github.com/Permissionless-Software-Foundation/bch-js) JavaScript library.
 
-This repository is intended to be paired with [bch-js](https://github.com/Permissionless-Software-Foundation/bch-js), an npm JavaScript library for building Bitcoin Cash apps.
+**Deprecation Warning:** This repository has been moved to the [Permissionless Software Foundation bch-api repository](https://github.com/Permissionless-Software-Foundation/bch-api). This repository is deprecated. [@chris.troutner/bch-api v1.0.0](https://www.npmjs.com/package/@chris.troutner/bch-api) is the last version published from this repository. [@psf/bch-api v1.1.0+](https://github.com/Permissionless-Software-Foundation/bch-api) is the continuation of the library.
+
+This is a fork and alternative implementation of
+the [rest.bitcoin.com](https://github.com/Bitcoin-com/rest.bitcoin.com) repository.
+The purpose of this code is to create a REST API server that provides a common
+interface for working with a Bitcoin Cash full node and various indexers. See [this article](https://troutsblog.com/research/bitcoin-cash/how-to-bch-full-stack-developer) to learn about the 'Cash Stack'. Visit [FullStack.cash](https://fullstack.cash), sign up for a free account, and use this REST API right away with the [bch-js](https://github.com/christroutner/bch-js) JavaScript library.
 
 ![Cash Stack Network Diagram](./generic-network-diagram.png)
 
