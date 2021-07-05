@@ -15,6 +15,11 @@ export RPC_BASEURL=http://$RPC_IP/
 export RPC_USERNAME=bitcoin
 export RPC_PASSWORD=password
 
+# (optional) If load-balancing multiple full nodes, it's best to pick a single
+# one for broadcasting transactions to the network. Prevents accidental
+# double spends.
+#export RPC_SENDURL=http://$RPC_IP/
+
 # SLPDB
 export SLPDB_PASS_GP=somelongpassword
 export SLPDB_URL=http://<SLPDB IP>:12300/
@@ -48,12 +53,12 @@ export PRO_PASS=somerandomepassword:someotherrandompassword:aThirdPassword
 # that originate froma domain on the whitelist.
 export WHITELIST_DOMAINS=fullstack.cash,psfoundation.cash,torlist.cash
 
-# Rate Limits. Numbers are divided into 1000. e.g. 1000 / 50 = 20 RPM for ANON.
+# Rate Limits. Numbers are divided into 1000. e.g. 10000 / 500 = 20 RPM for ANON.
 # Requests use the ANON rate limit if they fail to pass in a JWT token.
 # ANON = 20 requests per minute (RPM)
-export ANON_RATE_LIMIT=50
-# 10 = 100 RPM
-export WHITELIST_RATE_LIMIT=10
+export ANON_RATE_LIMIT=500
+# 10 = 1000 RPM
+export WHITELIST_RATE_LIMIT=100
 
 # Set logging parameters
 #1m means no more than 1 megabyte
