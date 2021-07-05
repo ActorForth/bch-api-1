@@ -62,6 +62,7 @@ class RouteUtils {
   // testnet address into rest.bitcoin.com or passing a mainnet address into
   // trest.bitcoin.com.
   validateNetwork (addr) {
+    const address = addr
     try {
       const network = process.env.NETWORK
 
@@ -71,9 +72,21 @@ class RouteUtils {
         return false
       }
 
+      if (address === '') return false
+      let cashAddr
+
       // Convert the user-provided address to a cashaddress, for easy detection
       // of the intended network.
-      const cashAddr = this.bchjs.Address.toCashAddress(addr)
+      if (address.split(':')[0] === 'slpreg') {
+        cashAddr = this.bchjs.Address.toCashAddress(address, true, true)
+      } else if (['slptest', 'simpleledger'].indexOf(address.split(':')[0]) >= 0) {
+        cashAddr = this.bchjs.Address.toCashAddress(address)
+      } else {
+        cashAddr = this.bchjs.Address.toCashAddress(address)
+      }
+
+      const addrIsRegTest = this.bchjs.Address.isRegTestAddress(cashAddr)
+      if (network === 'regtest' && addrIsRegTest) return true
 
       // Return true if the network and address both match testnet
       const addrIsTest = this.bchjs.Address.isTestnetAddress(cashAddr)
