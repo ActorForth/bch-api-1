@@ -32,7 +32,7 @@ class Electrum {
     this.bchjs = bchjs
     // _this.bitcore = bitcore
 
-    this.fulcrumApi = process.env.FULCRUM_API
+    this.fulcrumApi = process.env.FULCRUM_URL
     if (!this.fulcrumApi) {
       throw new Error(
         'FULCRUM_API env var not set. Can not connect to Fulcrum indexer.'

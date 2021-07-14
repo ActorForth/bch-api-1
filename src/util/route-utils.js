@@ -73,8 +73,16 @@ class RouteUtils {
 
       // Convert the user-provided address to a cashaddress, for easy detection
       // of the intended network.
-      const cashAddr = this.bchjs.Address.toCashAddress(addr)
+      let cashAddr
 
+      if (addr.split(':')[0] === 'slpreg') {
+        cashAddr = this.bchjs.Address.toCashAddress(addr, true, true)
+      } else if (['slptest', 'simpleledger'].indexOf(addr.split(':')[0]) >= 0) {
+        cashAddr = this.bchjs.Address.toCashAddress(addr)
+      } else {
+        cashAddr = this.bchjs.Address.toCashAddress(addr)
+      }
+      
       // Return true if the network and address both match testnet
       const addrIsTest = this.bchjs.Address.isTestnetAddress(cashAddr)
       if (network === 'testnet' && addrIsTest) return true
@@ -82,6 +90,9 @@ class RouteUtils {
       // Return true if the network and address both match mainnet
       const addrIsMain = this.bchjs.Address.isMainnetAddress(cashAddr)
       if (network === 'mainnet' && addrIsMain) return true
+      
+      const addrIsReg = this.bchjs.Address.isRegTestAddress(cashAddr)
+      if (network === 'regtest' && addrIsReg) return true
 
       return false
     } catch (err) {
