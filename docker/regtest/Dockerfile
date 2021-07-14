@@ -23,5 +23,5 @@ RUN npm run docs
 
 EXPOSE 3000
 
-COPY start-local-testnet.sh start-local-testnet.sh
-CMD ["./start-local-testnet.sh"]
+COPY start-regtest-example.sh start-regtest-example.sh
+CMD ["./start-testnet-example.sh"]
