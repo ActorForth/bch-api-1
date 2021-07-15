@@ -43,7 +43,11 @@ const redisOptions = {
   port: process.env.REDIS_PORT ? process.env.REDIS_PORT : 6379,
   host: process.env.REDIS_HOST ? process.env.REDIS_HOST : '127.0.0.1'
 }
-const redisClient = new Redis(redisOptions)
+const DO_NOT_USE_RATE_LIMITS = process.env.DO_NOT_USE_RATE_LIMITS || false
+let redisClient
+if (!DO_NOT_USE_RATE_LIMITS) {
+  redisClient = new Redis(redisOptions)
+}
 const rateLimitOptions = {
   storeClient: redisClient,
   points: config.pointsPerMinute, // Number of points

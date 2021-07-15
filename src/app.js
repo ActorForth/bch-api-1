@@ -2,9 +2,7 @@
 
 const express = require('express')
 
-// Middleware
-const RateLimits = require('./middleware/route-ratelimit')
-const rateLimits = new RateLimits()
+
 
 const path = require('path')
 const logger = require('morgan')
@@ -125,12 +123,7 @@ app.use('/', logReqInfo)
 const v4prefix = 'v4'
 const v5prefix = 'v5'
 
-// START Rate Limits
-const auth = new AuthMW()
 
-// Ensure req.locals and res.locals objects exist.
-app.use(`/${v4prefix}/`, rateLimits.populateLocals)
-app.use(`/${v5prefix}/`, rateLimits.populateLocals)
 
 // Allow users to turn off rate limits with an environment variable.
 const DO_NOT_USE_RATE_LIMITS = process.env.DO_NOT_USE_RATE_LIMITS || false
@@ -138,6 +131,17 @@ const DO_NOT_USE_RATE_LIMITS = process.env.DO_NOT_USE_RATE_LIMITS || false
 console.log(`DO_NOT_USE_RATE_LIMITS: ${DO_NOT_USE_RATE_LIMITS}`)
 
 if (!DO_NOT_USE_RATE_LIMITS) {
+  // START Rate Limits
+  const auth = new AuthMW()
+
+  // Middleware
+  const RateLimits = require('./middleware/route-ratelimit')
+  const rateLimits = new RateLimits()
+
+  // Ensure req.locals and res.locals objects exist.
+  app.use(`/${v4prefix}/`, rateLimits.populateLocals)
+  app.use(`/${v5prefix}/`, rateLimits.populateLocals)
+
   console.log('Rate limits are being used')
   // Inspect the header for a JWT token.
   app.use(`/${v4prefix}/`, jwtAuth.getTokenFromHeaders)
