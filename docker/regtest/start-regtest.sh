@@ -1,7 +1,5 @@
 #!/bin/bash
 
-# Full node
-export NETWORK=regtest
 # Docker containers for the below infrastructure is described here:
 # https://psfoundation.cash/blog/cash-stack
 # Pre-synced databases can be downloaded on the CashStrap page:
@@ -28,7 +26,7 @@ export SLPDB_PASS_WL=somelongpassword
 export SLP_API_URL=http://10.0.0.5:5001/
 
 # Mainnet Fulcrum / ElectrumX
-export FULCRUM_URL=localhost
+export FULCRUM_URL=nginx-regtest
 export FULCRUM_PORT=50002
 
 export SECURITY=false
@@ -40,8 +38,8 @@ export SECURITY=false
 # https://github.com/Permissionless-Software-Foundation/jwt-bch-api
 export TOKENSECRET=somelongpassword
 # Redis DB - Used for rate limiting - customize to your own Redis installation.
-export REDIS_HOST=6379
-export REDIS_PORT=127.0.0.1
+export REDIS_PORT=6381
+export REDIS_HOST=172.17.0.1
 ##################################
 
 # So that bch-api can call bch-js locally.
@@ -67,4 +65,6 @@ export LOG_MAX_SIZE=1m
 #5d means store no more than 5 days
 export LOG_MAX_FILES=5d
 
-# npm start
+export DO_NOT_USE_RATE_LIMITS=true
+
+npm start

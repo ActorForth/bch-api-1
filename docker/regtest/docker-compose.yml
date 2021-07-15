@@ -1,19 +1,28 @@
-bch-api-test:
-  build: .
-  dockerfile: Dockerfile
-  #image: bitcore
-  container_name: bch-api-test
-  links:
-    - redis-test
-  ports:
-    - "4000:3000"
-  volumes:
-    - ../../logs:/home/safeuser/bch-api/logs    
-  restart: always
+version: "3"
+services:
+  bch-api-regtest:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    #image: bitcore
+    container_name: bch-api-regtest
+    links:
+      - redis-reg
+    ports:
+      - "3000:3000"
+    volumes:
+      - ../../logs:/home/safeuser/bch-api/logs    
+    restart: always
+    networks:
+      - bitcoin-bridging
 
-redis-test:
-  image: redis:latest
-  container_name: redis-test
-  restart: always
-  ports:
-    - "172.17.0.1:6380:6379"
+  redis-reg:
+    image: redis:latest
+    container_name: redis-reg
+    restart: always
+    ports:
+      - "172.17.0.1:6381:6381"
+
+networks:
+  bitcoin-bridging:
+    external: true

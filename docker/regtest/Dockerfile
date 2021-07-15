@@ -13,7 +13,7 @@ USER safeuser
 
 # Clone the repository
 WORKDIR /home/safeuser
-RUN git clone https://github.com/ActorForth/bch-api-1
+RUN git clone https://github.com/ActorForth/bch-api-1.git
 WORKDIR /home/safeuser/bch-api-1
 RUN git checkout regtest
 RUN npm install --silent
@@ -23,5 +23,5 @@ RUN npm run docs
 
 EXPOSE 3000
 
-COPY start-regtest-example.sh start-regtest-example.sh
-CMD ["./start-testnet-example.sh"]
+COPY start-regtest.sh start-regtest.sh
+CMD ["./start-regtest.sh"]
