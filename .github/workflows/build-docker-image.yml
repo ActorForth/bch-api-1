@@ -21,7 +21,7 @@ jobs:
       - name: Build docker image
         run: |
           export TAG_BCHAPI=$(git describe --always --tags --dirty --abbrev=7 | sed 's/^.*\(.\{7\}\)/\1/')
-          docker build -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:$TAG_BCHAPI -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest ./
+          docker build -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:$TAG_BCHAPI -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest ./docker/regtest
 
       - name: Docker Login
         uses: docker/login-action@v1
